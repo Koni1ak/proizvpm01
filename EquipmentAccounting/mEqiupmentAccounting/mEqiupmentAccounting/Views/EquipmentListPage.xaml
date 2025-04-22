@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:mEquipmentAccounting.ViewModels"
+             x:Class="mEquipmentAccounting.Views.EquipmentListPage"
+             Title="{Binding Title}">
+   
+
+    
+    <ContentPage.BindingContext>
+        <vm:EquipmentListViewModel />
+    </ContentPage.BindingContext>
+
+    <Grid>
+        
+        <ListView x:Name="ItemsListView"
+                  ItemsSource="{Binding EquipmentItems}"
+                  HasUnevenRows="True"
+                  CachingStrategy="RecycleElement"
+                  ItemSelected="OnItemSelected">
+            
+
+            
+            <ListView.Header>
+                <Label Text="Загрузка..."
+                        IsVisible="{Binding IsBusy}"
+                        HorizontalOptions="Center" Padding="10"/>
+            </ListView.Header>
+            <ListView.Footer>
+                <Label Text="Список пуст. Нет данных."
+                        IsVisible="{Binding IsBusy, Converter={StaticResource Key=BooleanNegationConverter}}" 
+                    HorizontalOptions="Center" Padding="20" TextColor="Gray"/>
+            </ListView.Footer>
+
+           
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell Text="{Binding Name}"
+                              Detail="{Binding InventoryNumber, StringFormat='Инв. №: {0}'}" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        
+    </Grid>
+</ContentPage>

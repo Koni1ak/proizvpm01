@@ -1,0 +1,17 @@
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\bin\Debug\netstandard2.0\mEquipmentAccounting.deps.json
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\bin\Debug\netstandard2.0\mEquipmentAccounting.dll
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\bin\Debug\netstandard2.0\ref\mEquipmentAccounting.dll
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\bin\Debug\netstandard2.0\mEquipmentAccounting.pdb
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.csproj.AssemblyReference.cache
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\App.xaml.g.cs
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\MainPage.xaml.g.cs
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\Views\EquipmentDetailPage.xaml.g.cs
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\Views\EquipmentListPage.xaml.g.cs
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.AssemblyInfoInputs.cache
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.AssemblyInfo.cs
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.csproj.CoreCompileInputs.cache
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\XamlC.stamp
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.dll
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\refint\mEquipmentAccounting.dll
+C:\Users\1\source\repos\EquipmentAccounting\mEqiupmentAccounting\mEqiupmentAccounting\obj\Debug\netstandard2.0\mEquipmentAccounting.pdb

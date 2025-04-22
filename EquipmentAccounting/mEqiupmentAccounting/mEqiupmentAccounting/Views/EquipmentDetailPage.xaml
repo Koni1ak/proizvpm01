@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="mEquipmentAccounting.Views.EquipmentDetailPage"
+             Title="Детали">
+ 
+
+    <ScrollView>
+        <StackLayout Padding="15" Spacing="10">
+
+            <Label Text="Название:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="NameLabel" FontSize="Medium" FontAttributes="Bold"/>
+
+            <Label Text="Инвентарный номер:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="InventoryLabel" FontSize="Medium"/>
+
+            <Label Text="Серийный номер:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="SerialLabel" FontSize="Medium"/>
+
+            <Label Text="Категория:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="CategoryLabel" FontSize="Medium"/>
+
+            <Label Text="Статус:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="StatusLabel" FontSize="Medium"/>
+
+            <Label Text="Местоположение:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="LocationLabel" FontSize="Medium"/>
+
+            <Label Text="Пользователь:" FontSize="Small" TextColor="Gray"/>
+            <Label x:Name="UserLabel" FontSize="Medium"/>
+
+            <Label Text="Описание:" FontSize="Small" TextColor="Gray" IsVisible="False" x:Name="DescriptionHeaderLabel"/>
+            <Label x:Name="DescriptionLabel" FontSize="Small"/>
+
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>

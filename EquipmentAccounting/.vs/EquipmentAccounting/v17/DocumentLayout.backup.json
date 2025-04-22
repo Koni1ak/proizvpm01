@@ -1,0 +1,188 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}|unittest\\unittest.csproj|c:\\users\\1\\desktop\\equipmentaccounting\\unittest\\unittest1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}|unittest\\unittest.csproj|solutionrelative:unittest\\unittest1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4D7A8537-E2DC-4E47-B34D-93D369D68B34}|unit test\\unit test.csproj|c:\\users\\1\\desktop\\equipmentaccounting\\unit test\\unit test.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{4D7A8537-E2DC-4E47-B34D-93D369D68B34}|unit test\\unit test.csproj|solutionrelative:unit test\\unit test.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|c:\\users\\1\\desktop\\equipmentaccounting\\equipmentaccounting\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|C:\\Users\\1\\Desktop\\EquipmentAccounting\\equipmentaccounting\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\mainform.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|C:\\Users\\1\\Desktop\\EquipmentAccounting\\equipmentaccounting\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\mainform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|C:\\Users\\1\\Desktop\\EquipmentAccounting\\equipmentaccounting\\equipmentform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\equipmentform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{856306FE-E58D-4A85-83D1-8F3B446F7E25}|mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj|c:\\users\\1\\desktop\\equipmentaccounting\\meqiupmentaccounting\\meqiupmentaccounting\\services\\supabaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{856306FE-E58D-4A85-83D1-8F3B446F7E25}|mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj|solutionrelative:meqiupmentaccounting\\meqiupmentaccounting\\services\\supabaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|C:\\Users\\1\\Desktop\\EquipmentAccounting\\equipmentaccounting\\services\\supabaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\services\\supabaseservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|C:\\Users\\1\\Desktop\\EquipmentAccounting\\equipmentaccounting\\equipmentform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\equipmentform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|C:\\Users\\1\\Desktop\\EquipmentAccounting\\equipmentaccounting\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A6E77B0A-538E-4086-A5EF-3C75952CA864}|EquipmentAccounting\\EquipmentAccounting.csproj|solutionrelative:equipmentaccounting\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "unit test",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\unit test\\unit test.csproj",
+              "RelativeDocumentMoniker": "unit test\\unit test.csproj",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\unit test\\unit test.csproj",
+              "RelativeToolTip": "unit test\\unit test.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-04-22T05:49:37.48Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "UnitTest1.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\unittest\\UnitTest1.cs",
+              "RelativeDocumentMoniker": "unittest\\UnitTest1.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\unittest\\UnitTest1.cs",
+              "RelativeToolTip": "unittest\\UnitTest1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T05:49:03.32Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "SupabaseService.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\Services\\SupabaseService.cs",
+              "RelativeDocumentMoniker": "mEqiupmentAccounting\\mEqiupmentAccounting\\Services\\SupabaseService.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\Services\\SupabaseService.cs",
+              "RelativeToolTip": "mEqiupmentAccounting\\mEqiupmentAccounting\\Services\\SupabaseService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAwAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:53:45.294Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MainForm.Designer.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\MainForm.Designer.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\MainForm.Designer.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\MainForm.Designer.cs",
+              "RelativeToolTip": "EquipmentAccounting\\MainForm.Designer.cs",
+              "ViewState": "AgIAAJcAAAAAAAAAAAAIwGsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:38:11.726Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "EquipmentForm.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\EquipmentForm.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\EquipmentForm.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\EquipmentForm.cs",
+              "RelativeToolTip": "EquipmentAccounting\\EquipmentForm.cs",
+              "ViewState": "AgIAAFIAAAAAAAAAAAAcwMUAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:41:53.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainForm.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\MainForm.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\MainForm.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\MainForm.cs",
+              "RelativeToolTip": "EquipmentAccounting\\MainForm.cs",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAcwFEAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:33:49.574Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "SupabaseService.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\Services\\SupabaseService.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\Services\\SupabaseService.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\Services\\SupabaseService.cs",
+              "RelativeToolTip": "EquipmentAccounting\\Services\\SupabaseService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAA4AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:31:20.476Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\Program.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\Program.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\Program.cs",
+              "RelativeToolTip": "EquipmentAccounting\\Program.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAIAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:30:38.598Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "MainForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\MainForm.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\MainForm.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\MainForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "RelativeToolTip": "EquipmentAccounting\\MainForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:26:15.557Z",
+              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "EquipmentForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "DocumentMoniker": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\EquipmentForm.cs",
+              "RelativeDocumentMoniker": "EquipmentAccounting\\EquipmentForm.cs",
+              "ToolTip": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\EquipmentAccounting\\EquipmentForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "RelativeToolTip": "EquipmentAccounting\\EquipmentForm.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T04:26:14.279Z",
+              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
