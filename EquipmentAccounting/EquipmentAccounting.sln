@@ -9,13 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mEqiupmentAccounting.Androi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mEquipmentAccounting", "mEqiupmentAccounting\mEqiupmentAccounting\mEquipmentAccounting.csproj", "{856306FE-E58D-4A85-83D1-8F3B446F7E25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "unit test", "unit test\unit test.csproj", "{4D7A8537-E2DC-4E47-B34D-93D369D68B34}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "unittest", "unittest\unittest.csproj", "{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A6E77B0A-538E-4086-A5EF-3C75952CA864} = {A6E77B0A-538E-4086-A5EF-3C75952CA864}
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,14 +29,6 @@ Global
 		{856306FE-E58D-4A85-83D1-8F3B446F7E25}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{856306FE-E58D-4A85-83D1-8F3B446F7E25}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{856306FE-E58D-4A85-83D1-8F3B446F7E25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D7A8537-E2DC-4E47-B34D-93D369D68B34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D7A8537-E2DC-4E47-B34D-93D369D68B34}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D7A8537-E2DC-4E47-B34D-93D369D68B34}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D7A8537-E2DC-4E47-B34D-93D369D68B34}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C9AEF2D-90E5-48A1-8D33-66AD6FC198C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

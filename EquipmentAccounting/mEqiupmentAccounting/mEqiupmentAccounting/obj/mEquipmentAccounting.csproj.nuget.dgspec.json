@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj": {}
+    "C:\\Users\\1\\source\\repos\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj": {}
   },
   "projects": {
-    "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj": {
+    "C:\\Users\\1\\source\\repos\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj",
+        "projectUniqueName": "C:\\Users\\1\\source\\repos\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj",
         "projectName": "mEquipmentAccounting",
-        "projectPath": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj",
+        "projectPath": "C:\\Users\\1\\source\\repos\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\mEquipmentAccounting.csproj",
         "packagesPath": "C:\\Users\\1\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\1\\Desktop\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\obj\\",
+        "outputPath": "C:\\Users\\1\\source\\repos\\EquipmentAccounting\\mEqiupmentAccounting\\mEqiupmentAccounting\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

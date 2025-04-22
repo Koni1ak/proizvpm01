@@ -1,312 +1,294 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading.Tasks; 
 using System.Windows.Forms;
+using System.Xml.Linq;
 using EquipmentAccounting.Models; 
 using EquipmentAccounting.Services; 
-using System.Diagnostics;
-using Guna.UI2.WinForms;
 
-namespace EquipmentAccounting 
+namespace EquipmentAccounting
 {
     public partial class EquipmentForm : Form
     {
-        private Equipment _currentEquipment; 
-        private Equipment _originalEquipmentData; 
+        
+        private readonly Equipment _currentEquipment; 
+        private readonly string _performingUserId;  
         private List<Category> _categories;
         private List<Status> _statuses;
         private List<Location> _locations;
-        private List<User> _users;
+        private List<User> _users; 
 
         
-        public EquipmentForm() : this(null) { }
-
-        
-        public EquipmentForm(Equipment equipmentToEdit)
+        public EquipmentForm(Equipment equipmentToEdit, string performingUserId)
         {
             InitializeComponent();
-            _currentEquipment = equipmentToEdit;
+
+            _currentEquipment = equipmentToEdit; 
 
             
-            if (_currentEquipment != null)
+            if (string.IsNullOrWhiteSpace(performingUserId))
             {
-                
-                _originalEquipmentData = new Equipment
-                {
-                    
-                    EquipmentId = _currentEquipment.EquipmentId,
-                    Name = _currentEquipment.Name,
-                    SerialNumber = _currentEquipment.SerialNumber,
-                    InventoryNumber = _currentEquipment.InventoryNumber,
-                    Description = _currentEquipment.Description,
-                    PurchaseDate = _currentEquipment.PurchaseDate,
-                    WarrantyExpiryDate = _currentEquipment.WarrantyExpiryDate,
-                    CategoryId = _currentEquipment.CategoryId,
-                    StatusId = _currentEquipment.StatusId,
-                    LocationId = _currentEquipment.LocationId,
-                    AssignedUserId = _currentEquipment.AssignedUserId,
-                    CreatedAt = _currentEquipment.CreatedAt, 
-                    UpdatedAt = _currentEquipment.UpdatedAt 
-                                                           
-                };
-                this.Text = $"Редактировать: {_currentEquipment.Name}";
+               
+                throw new ArgumentNullException(nameof(performingUserId), "Performing User ID cannot be null or empty.");
             }
-            else
-            {
-                this.Text = "Добавить новое оборудование";
-            }
+            _performingUserId = performingUserId;
+
+     
+            this.Text = _currentEquipment == null ? "Добавить оборудование" : "Редактировать оборудование";
         }
 
+        
         private async void EquipmentForm_Load(object sender, EventArgs e)
         {
-            Debug.WriteLine("EquipmentForm: Loading...");
-            this.Cursor = Cursors.WaitCursor;
+          
             try
             {
-                await LoadComboBoxDataAsync();
-                PopulateFields();
+                await LoadComboBoxDataAsync(); 
+                PopulateFields();             
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"!!! EquipmentForm: Error loading ComboBox data: {ex}");
-                MessageBox.Show($"Ошибка загрузки справочников: {ex.Message}", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                this.BeginInvoke(new Action(() => this.Close())); 
-            }
-            finally
-            {
-                this.Cursor = Cursors.Default;
-                Debug.WriteLine("EquipmentForm: Load complete.");
+                
+                MessageBox.Show($"Критическая ошибка при загрузке справочников: {ex.Message}\nФорма не может быть использована.",
+                                "Ошибка загрузки данных", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.DialogResult = DialogResult.Abort; 
+                this.Close();                           
             }
         }
 
+      
         private async Task LoadComboBoxDataAsync()
         {
-            Debug.WriteLine("EquipmentForm: Loading ComboBox data...");
-            // Загружаем данные параллельно
+            
             var categoryTask = SupabaseService.GetCategoriesAsync();
             var statusTask = SupabaseService.GetStatusesAsync();
             var locationTask = SupabaseService.GetLocationsAsync();
-            var userTask = SupabaseService.GetUsersAsync(); // Загружаем пользователей
+            var userTask = SupabaseService.GetUsersAsync(); 
 
+            
             await Task.WhenAll(categoryTask, statusTask, locationTask, userTask);
 
+            
             _categories = await categoryTask;
             _statuses = await statusTask;
             _locations = await locationTask;
             _users = await userTask;
-            Debug.WriteLine($"EquipmentForm: Loaded {_categories.Count} categories, {_statuses.Count} statuses, {_locations.Count} locations, {_users.Count} users.");
 
+            
+            Console.WriteLine($"Categories loaded for ComboBox: {_categories?.Count ?? 0}");
+            Console.WriteLine($"Statuses loaded for ComboBox: {_statuses?.Count ?? 0}");
+            Console.WriteLine($"Locations loaded for ComboBox: {_locations?.Count ?? 0}");
+            Console.WriteLine($"Users (dictionary) loaded for ComboBox: {_users?.Count ?? 0}");
+        
 
-            // Настройка ComboBox'ов
-            SetupComboBox(cmbCategory, _categories, "CategoryName", "CategoryId");
-            SetupComboBox(cmbStatus, _statuses, "StatusName", "StatusId");
-            SetupComboBox(cmbLocation, _locations, "LocationName", "LocationId");
+         
+            if (_categories == null || _statuses == null || _locations == null || _users == null)
+            {
+                throw new InvalidOperationException("Один или несколько справочников не удалось загрузить.");
+            }
 
-            // Пользователи + опция "Не назначен"
-            var userListWithNone = new List<User> { new User { UserId = 0, FirstName = "Не", LastName = "назначен" } }; // ID 0 - признак null
-            // Добавляем только активных пользователей и сортируем
+          
+
+          
+            cmbCategory.DataSource = _categories;
+            cmbCategory.DisplayMember = nameof(Category.CategoryName); 
+            cmbCategory.ValueMember = nameof(Category.CategoryId);
+
+          
+            cmbStatus.DataSource = _statuses;
+            cmbStatus.DisplayMember = nameof(Status.StatusName);
+            cmbStatus.ValueMember = nameof(Status.StatusId);
+
+            
+            cmbLocation.DataSource = _locations;
+            cmbLocation.DisplayMember = nameof(EquipmentAccounting.Models.Location.LocationName);
+            cmbLocation.ValueMember = nameof(EquipmentAccounting.Models.Location.LocationId);
+
+            
+            var userListWithNone = new List<User>
+            {
+               
+                new User { UserId = 0, FirstName = "Не", LastName = "назначен" }
+            };
+            
             userListWithNone.AddRange(_users.Where(u => u.IsActive).OrderBy(u => u.LastName).ThenBy(u => u.FirstName));
-            SetupComboBox(cmbAssignedUser, userListWithNone, "FullName", "UserId"); // Используем свойство FullName
-            Debug.WriteLine("EquipmentForm: ComboBoxes setup complete.");
+
+            cmbAssignedUser.DataSource = userListWithNone;
+            cmbAssignedUser.DisplayMember = nameof(User.FullName); 
+            cmbAssignedUser.ValueMember = nameof(User.UserId);
         }
 
-        // Вспомогательный метод для настройки ComboBox
-        private void SetupComboBox(ComboBox comboBox, object dataSource, string displayMember, string valueMember)
-        {
-            comboBox.DataSource = dataSource;
-            comboBox.DisplayMember = displayMember;
-            comboBox.ValueMember = valueMember;
-            comboBox.DropDownStyle = ComboBoxStyle.DropDownList; // Запретить ручной ввод
-            comboBox.SelectedIndex = -1; // Сбросить выбор по умолчанию
-        }
-
-
+        
         private void PopulateFields()
         {
-            Debug.WriteLine("EquipmentForm: Populating fields...");
-            if (_currentEquipment != null) // Режим редактирования
+            if (_currentEquipment != null) 
             {
                 Name.Text = _currentEquipment.Name;
                 SerialNumber.Text = _currentEquipment.SerialNumber;
                 InventoryNumber.Text = _currentEquipment.InventoryNumber;
                 Description.Text = _currentEquipment.Description;
 
-                SetDateTimePickerValue(dtpPurchaseDate, _currentEquipment.PurchaseDate);
-                SetDateTimePickerValue(dtpWarrantyExpiryDate, _currentEquipment.WarrantyExpiryDate);
+                
+                dtpPurchaseDate.Checked = _currentEquipment.PurchaseDate.HasValue;
+                if (_currentEquipment.PurchaseDate.HasValue)
+                {
+                   
+                    dtpPurchaseDate.Value = _currentEquipment.PurchaseDate.Value.Date;
+                }
 
+                dtpWarrantyExpiryDate.Checked = _currentEquipment.WarrantyExpiryDate.HasValue;
+                if (_currentEquipment.WarrantyExpiryDate.HasValue)
+                {
+                    dtpWarrantyExpiryDate.Value = _currentEquipment.WarrantyExpiryDate.Value.Date;
+                }
+
+               
                 cmbCategory.SelectedValue = _currentEquipment.CategoryId;
                 cmbStatus.SelectedValue = _currentEquipment.StatusId;
                 cmbLocation.SelectedValue = _currentEquipment.LocationId;
-                cmbAssignedUser.SelectedValue = _currentEquipment.AssignedUserId ?? 0; // 0 для "Не назначен"
+                
+                cmbAssignedUser.SelectedValue = _currentEquipment.AssignedUserId ?? 0;
 
-                // Поле заметок для редактирования должно быть пустым
-                Notes.Text = string.Empty;
-                lblNotes.Visible = true; // Показываем поле заметок
+                
+                lblNotes.Visible = true;
                 Notes.Visible = true;
-                Debug.WriteLine("EquipmentForm: Fields populated for Edit mode.");
+                Notes.Text = string.Empty; 
             }
-            else // Режим добавления
+            else 
             {
-                // Сбросить поля или установить значения по умолчанию
-                Name.Text = string.Empty;
-                SerialNumber.Text = string.Empty;
-                InventoryNumber.Text = string.Empty;
-                Description.Text = string.Empty;
-                dtpPurchaseDate.Checked = false; // Сбросить дату
-                dtpWarrantyExpiryDate.Checked = false; // Сбросить дату
-                cmbCategory.SelectedIndex = -1;
-                cmbStatus.SelectedIndex = -1;
-                cmbLocation.SelectedIndex = -1;
-                cmbAssignedUser.SelectedValue = 0; // "Не назначен" по умолчанию
-
-                // Скрываем поле заметок при добавлении (или оставляем для начальной заметки)
+               
                 lblNotes.Visible = false;
                 Notes.Visible = false;
-                Notes.Text = "Equipment created via application"; // Заметка по умолчанию для создания
-                Debug.WriteLine("EquipmentForm: Fields reset for Add mode.");
+                Notes.Text = "Запись создана через приложение"; 
             }
         }
 
-        // Вспомогательный метод для установки значения DateTimePicker (с поддержкой null)
-        private void SetDateTimePickerValue(Guna2DateTimePicker dtp, DateTime? value)
-        {
-            if (value.HasValue)
-            {
-                // Убедимся, что значение в допустимом диапазоне DateTimePicker
-                // Свойства MinDate/MaxDate/Value/Checked обычно совпадают у Guna
-                if (value.Value >= dtp.MinDate && value.Value <= dtp.MaxDate)
-                {
-                    dtp.Value = value.Value;
-                    dtp.Checked = true; // Guna2DateTimePicker также имеет свойство Checked
-                }
-                else
-                {
-                    // Значение вне диапазона - сбрасываем
-                    dtp.Checked = false;
-                    Debug.WriteLine($"!!! Warning: Date {value.Value} is out of range for {dtp.Name}.");
-                }
-            }
-            else
-            {
-                dtp.Checked = false; // Если null, снимаем галочку
-            }
-        }
-
-
+        
         private async void btnSave_Click(object sender, EventArgs e)
         {
-            Debug.WriteLine("EquipmentForm: Save button clicked.");
-            // --- Валидация ---
-            if (!ValidateInput())
+            
+            if (string.IsNullOrWhiteSpace(Name.Text))
             {
-                Debug.WriteLine("EquipmentForm: Validation failed.");
+                MessageBox.Show("Поле 'Название' не может быть пустым.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                Name.Focus();
                 return;
             }
-            Debug.WriteLine("EquipmentForm: Validation passed.");
+            if (cmbCategory.SelectedValue == null)
+            {
+                MessageBox.Show("Необходимо выбрать 'Категорию'.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cmbCategory.Focus();
+                return;
+            }
+            if (cmbStatus.SelectedValue == null)
+            {
+                MessageBox.Show("Необходимо выбрать 'Статус'.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cmbStatus.Focus();
+                return;
+            }
+            if (cmbLocation.SelectedValue == null)
+            {
+                MessageBox.Show("Необходимо выбрать 'Местоположение'.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cmbLocation.Focus();
+                return;
+            }
+            if (cmbAssignedUser.SelectedValue == null)
+            {
+                
+                MessageBox.Show("Необходимо выбрать 'Пользователя' (или 'Не назначен').", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                cmbAssignedUser.Focus();
+                return;
+            }
+            
 
-            // --- Сбор данных ---
-            // Создаем новый объект или получаем ссылку на редактируемый
+            
             var equipmentData = _currentEquipment ?? new Equipment();
 
             equipmentData.Name = Name.Text.Trim();
             equipmentData.SerialNumber = string.IsNullOrWhiteSpace(SerialNumber.Text) ? null : SerialNumber.Text.Trim();
             equipmentData.InventoryNumber = string.IsNullOrWhiteSpace(InventoryNumber.Text) ? null : InventoryNumber.Text.Trim();
             equipmentData.Description = string.IsNullOrWhiteSpace(Description.Text) ? null : Description.Text.Trim();
+
+            
             equipmentData.PurchaseDate = dtpPurchaseDate.Checked ? dtpPurchaseDate.Value.Date : (DateTime?)null;
             equipmentData.WarrantyExpiryDate = dtpWarrantyExpiryDate.Checked ? dtpWarrantyExpiryDate.Value.Date : (DateTime?)null;
+
+            
             equipmentData.CategoryId = (long)cmbCategory.SelectedValue;
             equipmentData.StatusId = (long)cmbStatus.SelectedValue;
             equipmentData.LocationId = (long)cmbLocation.SelectedValue;
-            long selectedUserId = (long)cmbAssignedUser.SelectedValue;
-            equipmentData.AssignedUserId = selectedUserId == 0 ? (long?)null : selectedUserId;
 
-            // Получаем ID пользователя-заглушки
-            long currentUserId = SupabaseService.GetCurrentUserIdPlaceholder();
+            
+            long selectedAssignedUserId = (long)cmbAssignedUser.SelectedValue;
+            equipmentData.AssignedUserId = selectedAssignedUserId == 0 ? (long?)null : selectedAssignedUserId;
+
+           
             string notes = string.IsNullOrWhiteSpace(Notes.Text) ? null : Notes.Text.Trim();
 
-
+            
+            btnSave.Enabled = false;
             this.Cursor = Cursors.WaitCursor;
-            btnSave.Enabled = false; // Блокируем кнопку на время сохранения
 
             try
             {
-                if (_currentEquipment == null) // --- Добавление ---
+               
+                if (string.IsNullOrWhiteSpace(_performingUserId))
                 {
-                    Debug.WriteLine("EquipmentForm: Calling AddEquipmentAsync...");
-                    if (string.IsNullOrWhiteSpace(notes)) notes = "Created via application";
-                    await SupabaseService.AddEquipmentAsync(equipmentData, currentUserId, notes);
-                    Debug.WriteLine("EquipmentForm: AddEquipmentAsync completed.");
-                }
-                else // --- Редактирование ---
-                {
-                    Debug.WriteLine("EquipmentForm: Calling UpdateEquipmentAsync...");
-                    if (string.IsNullOrWhiteSpace(notes)) notes = "Updated via application";
-                    // Передаем обновленные данные и ОРИГИНАЛЬНЫЕ данные для истории
-                    await SupabaseService.UpdateEquipmentAsync(equipmentData, _originalEquipmentData, currentUserId, notes);
-                    Debug.WriteLine("EquipmentForm: UpdateEquipmentAsync completed.");
+                    throw new InvalidOperationException("Не удалось определить ID пользователя для сохранения операции.");
                 }
 
-                this.DialogResult = DialogResult.OK; // Сигнализируем об успехе
-                this.Close();
+
+                if (_currentEquipment == null) 
+                {
+                    
+                    if (string.IsNullOrWhiteSpace(notes)) notes = "Запись создана через приложение";
+                  
+                    await SupabaseService.AddEquipmentAsync(equipmentData, _performingUserId, notes);
+                    MessageBox.Show("Оборудование успешно добавлено.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else 
+                {
+                    
+                    if (string.IsNullOrWhiteSpace(notes)) notes = "Запись обновлена через приложение";
+                    
+                    await SupabaseService.UpdateEquipmentAsync(equipmentData, _currentEquipment, _performingUserId, notes);
+                    MessageBox.Show("Оборудование успешно обновлено.", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+
+                this.DialogResult = DialogResult.OK; 
+                this.Close();                      
             }
-            catch (Exception ex)
+            catch (ArgumentNullException argEx) when (argEx.ParamName == "changedByUserId")
             {
-                Debug.WriteLine($"!!! EquipmentForm: Error saving data: {ex}");
-                MessageBox.Show($"Ошибка сохранения данных: {ex.Message}\n\n{ex.InnerException?.Message}", "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                // Остаемся на форме
+                
+                MessageBox.Show($"Критическая ошибка: ID пользователя не определен для сохранения.\n{argEx.Message}",
+                                "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (InvalidOperationException opEx)
+            {
+                MessageBox.Show($"Операция не может быть выполнена: {opEx.Message}",
+                               "Ошибка операции", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"Save Error: {ex}"); 
+                MessageBox.Show($"Ошибка сохранения данных: {ex.Message}",
+                                "Ошибка сохранения", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
             }
             finally
             {
+                
+                btnSave.Enabled = true;
                 this.Cursor = Cursors.Default;
-                btnSave.Enabled = true; // Разблокируем кнопку
             }
         }
 
-        private bool ValidateInput()
-        {
-            // Проверка обязательных полей
-            if (string.IsNullOrWhiteSpace(Name.Text))
-            {
-                MessageBox.Show("Поле 'Название' не может быть пустым.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                Name.Focus();
-                return false;
-            }
-            if (cmbCategory.SelectedValue == null || (long)cmbCategory.SelectedValue <= 0)
-            {
-                MessageBox.Show("Выберите категорию.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                cmbCategory.Focus();
-                return false;
-            }
-            if (cmbStatus.SelectedValue == null || (long)cmbStatus.SelectedValue <= 0)
-            {
-                MessageBox.Show("Выберите статус.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                cmbStatus.Focus();
-                return false;
-            }
-            if (cmbLocation.SelectedValue == null || (long)cmbLocation.SelectedValue <= 0)
-            {
-                MessageBox.Show("Выберите местоположение.", "Ошибка ввода", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                cmbLocation.Focus();
-                return false;
-            }
-
-            // Дополнительные проверки (например, уникальность номеров - лучше на стороне БД)
-            // ...
-
-            return true; // Все проверки пройдены
-        }
-
-
+        
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            Debug.WriteLine("EquipmentForm: Cancel button clicked.");
-            this.DialogResult = DialogResult.Cancel;
-            this.Close();
+            this.DialogResult = DialogResult.Cancel;  
+            this.Close();                           
         }
     }
 }

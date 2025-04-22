@@ -1,33 +1,57 @@
 ﻿using System;
 using System.Windows.Forms;
-using EquipmentAccounting.Services; 
+using EquipmentAccounting.Services;
+using Supabase.Gotrue; 
 
-namespace EquipmentAccounting 
+namespace EquipmentAccounting
 {
     static class Program
     {
-       
+     
         [STAThread]
-        static async System.Threading.Tasks.Task Main() 
+        static async System.Threading.Tasks.Task Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            User authenticatedUser = null; 
             try
             {
-                
-                await SupabaseService.InitializeAsync();
-                Console.WriteLine("Supabase client initialized successfully."); 
+                await SupabaseService.InitializeAsync(); 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Не удалось инициализировать подключение к базе данных: {ex.Message}",
-                                "Ошибка инициализации", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Не удалось инициализировать подключение: {ex.Message}", "Критическая ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return; 
             }
 
             
-            Application.Run(new MainForm());
+            while (authenticatedUser == null)
+            {
+                using (var loginForm = new LoginForm())
+                {
+                    var dialogResult = loginForm.ShowDialog(); 
+
+                    if (dialogResult == DialogResult.OK)
+                    {
+                        
+                        authenticatedUser = loginForm.AuthenticatedUser; 
+                    }
+                    else 
+                    {
+                        
+                        Application.Exit(); 
+                        return;
+                    }
+                }
+            }
+
+            
+            if (authenticatedUser != null)
+            {
+                
+                Application.Run(new MainForm(authenticatedUser));
+            }
         }
     }
 }

@@ -1,23 +1,34 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EquipmentAccounting.Models; // Проверьте namespace
-using Supabase;
-using Postgrest.Responses;
-using System.Linq;
-using System.Diagnostics; // Для Debug.WriteLine
+using EquipmentAccounting.Models; 
+using Supabase;                   
+using Supabase.Gotrue;            
+using Supabase.Gotrue.Exceptions; 
+using AuthUser = Supabase.Gotrue.User; 
+using Postgrest.Responses;        
+using static Postgrest.Constants;        
+using System.Linq;                
+using System.Text.Json;           
+using Postgrest;                  
 
-namespace EquipmentAccounting.Services // Проверьте namespace
+
+namespace EquipmentAccounting.Services
 {
+    
     public static class SupabaseService
     {
         private static Supabase.Client _client;
 
-        // ---> ВСТАВЬТЕ ВАШИ ДАННЫЕ SUPABASE <---
-        private const string SupabaseUrl = "https://dapkqisliqyzdejdywbw.supabase.co"; // ЗАМЕНИТЕ!
-        private const string SupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhcGtxaXNsaXF5emRlamR5d2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTA3MjksImV4cCI6MjA2MDU4NjcyOX0.oNFqOzJlj4xYAJttWIkDZJAMm4SEx95F1vycqbpFvUI"; // ЗАМЕНИТЕ!
-        // ---> ----------------------------- <---
+       
+        private const string SupabaseUrl = "https://dapkqisliqyzdejdywbw.supabase.co";
+        private const string SupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRhcGtxaXNsaXF5emRlamR5d2J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUwMTA3MjksImV4cCI6MjA2MDU4NjcyOX0.oNFqOzJlj4xYAJttWIkDZJAMm4SEx95F1vycqbpFvUI";
+       
+        
+        private static AuthUser _currentUser;
 
+        
         public static async Task InitializeAsync()
         {
             if (_client == null)
@@ -25,387 +36,465 @@ namespace EquipmentAccounting.Services // Проверьте namespace
                 var options = new SupabaseOptions
                 {
                     AutoRefreshToken = true,
-                    AutoConnectRealtime = true // Оставляем, если планировалось
+                    AutoConnectRealtime = false
                 };
 
-                Debug.WriteLine("SupabaseService: Initializing Supabase.Client...");
                 _client = new Supabase.Client(SupabaseUrl, SupabaseAnonKey, options);
                 await _client.InitializeAsync();
-                Debug.WriteLine("SupabaseService: Supabase.Client initialized.");
-            }
-            else
-            {
-                Debug.WriteLine("SupabaseService: Supabase.Client already initialized.");
+                Console.WriteLine("Supabase client initialized successfully.");
             }
         }
 
-        // Вспомогательный метод для проверки инициализации клиента
-        private static void EnsureClientInitialized()
+        
+        public static async Task<Session> SignInAsync(string email, string password)
+        {
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
+
+            try
+            {
+                var session = await _client.Auth.SignIn(email, password);
+
+                if (session != null && session.User != null)
+                {
+                    _currentUser = session.User; 
+                    Console.WriteLine($"User '{_currentUser.Email}' signed in successfully.");
+                    
+                }
+                else
+                {
+                    Console.WriteLine("SignIn returned null session/user without throwing an exception.");
+                    _currentUser = null;
+                }
+                return session;
+            }
+            catch (GotrueException ex)
+            {
+                Console.WriteLine($"Supabase Auth SignIn Error: Status={ex.StatusCode}, Reason={ex.Reason}, Message={ex.Message}");
+                _currentUser = null;
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Generic SignIn Error: {ex}");
+                _currentUser = null;
+                throw new Exception("Ошибка сети или сервера при попытке входа.", ex);
+            }
+        }
+
+        
+        public static async Task SignOutAsync()
         {
             if (_client == null)
             {
-                Debug.WriteLine("!!! SupabaseService Error: Client is null. InitializeAsync was not called or failed.");
-                // Бросаем исключение, чтобы предотвратить NullReferenceException при вызове _client.From<T>()
-                throw new InvalidOperationException("Supabase client is not initialized. Call InitializeAsync first.");
+                Console.WriteLine("SignOutAsync called but client is not initialized.");
+                _currentUser = null;
+                return;
+            }
+
+            try
+            {
+                if (_client.Auth.CurrentUser != null)
+                {
+                    Console.WriteLine($"Signing out user '{_client.Auth.CurrentUser.Email}' from Supabase session...");
+                    
+                    await _client.Auth.SignOut();
+                    Console.WriteLine("User signed out from Supabase session successfully.");
+                }
+                else
+                {
+                    Console.WriteLine("No active Supabase session found to sign out.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Supabase SignOut Error: {ex}");
+            }
+            finally
+            {
+                _currentUser = null;
+                Console.WriteLine("Local current user data cleared.");
             }
         }
 
-        // --- Методы для работы со справочниками ---
+       
+        public static AuthUser GetCurrentUser()
+        {
+            return _currentUser;
+        }
+
+        
+        public static string GetCurrentUserId()
+        {
+            return _currentUser?.Id;
+        }
+
+        
         public static async Task<List<Category>> GetCategoriesAsync()
         {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine("SupabaseService: Getting Categories...");
-            var response = await _client.From<Category>().Get();
-            Debug.WriteLine($"SupabaseService: GetCategories Status: {response?.ResponseMessage?.StatusCode}");
-            return response?.Models ?? new List<Category>();
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
+            try
+            {
+                var response = await _client.From<Category>().Get();
+                if (!response.ResponseMessage.IsSuccessStatusCode) { HandleErrorResponse("GetCategories", response.ResponseMessage, await response.ResponseMessage.Content.ReadAsStringAsync()); }
+                
+                return response.Models != null ? response.Models : new List<Category>();
+            }
+            catch (Exception ex) { HandleGenericError("GetCategories", ex); return new List<Category>(); }
         }
 
+       
         public static async Task<List<Status>> GetStatusesAsync()
         {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine("SupabaseService: Getting Statuses...");
-            var response = await _client.From<Status>().Get();
-            Debug.WriteLine($"SupabaseService: GetStatuses Status: {response?.ResponseMessage?.StatusCode}");
-            return response?.Models ?? new List<Status>();
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
+            try
+            {
+                var response = await _client.From<Status>().Get();
+                if (!response.ResponseMessage.IsSuccessStatusCode) { HandleErrorResponse("GetStatuses", response.ResponseMessage, await response.ResponseMessage.Content.ReadAsStringAsync()); }
+                
+                return response.Models != null ? response.Models : new List<Status>();
+            }
+            catch (Exception ex) { HandleGenericError("GetStatuses", ex); return new List<Status>(); }
         }
 
+        
         public static async Task<List<Location>> GetLocationsAsync()
         {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine("SupabaseService: Getting Locations...");
-            var response = await _client.From<Location>().Get();
-            Debug.WriteLine($"SupabaseService: GetLocations Status: {response?.ResponseMessage?.StatusCode}");
-            return response?.Models ?? new List<Location>();
-        }
-
-        public static async Task<List<User>> GetUsersAsync()
-        {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine("SupabaseService: Getting Users...");
-            // Загружаем только нужные поля для ComboBox
-            var response = await _client.From<User>()
-                                        .Select("user_id, username, first_name, last_name, is_active") // Добавили is_active для фильтрации
-                                        .Get();
-            Debug.WriteLine($"SupabaseService: GetUsers Status: {response?.ResponseMessage?.StatusCode}");
-            return response?.Models ?? new List<User>();
-        }
-
-
-        // --- Методы для работы с Оборудованием (Equipment) ---
-        public static async Task<List<Equipment>> GetEquipmentListAsync()
-        {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine("SupabaseService: Getting Equipment List...");
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
             try
             {
-                var response = await _client.From<Equipment>()
-                                            // Явный Select для избежания конфликтов псевдонимов
-                                            .Select("equipment_id, name, serial_number, inventory_number, description, purchase_date, warranty_expiry_date, created_at, updated_at, category_id, status_id, location_id, assigned_user_id, category:categories(category_id, category_name, description), status:statuses(status_id, status_name, description), location:locations(location_id, location_name, address, description), assigned_user:users!left(user_id, username, first_name, last_name, email, is_active)")
-                                            .Order("equipment_id", Postgrest.Constants.Ordering.Descending)
+                var response = await _client.From<Location>().Get();
+                if (!response.ResponseMessage.IsSuccessStatusCode) { HandleErrorResponse("GetLocations", response.ResponseMessage, await response.ResponseMessage.Content.ReadAsStringAsync()); }
+                
+                return response.Models != null ? response.Models : new List<Location>();
+            }
+            catch (Exception ex) { HandleGenericError("GetLocations", ex); return new List<Location>(); }
+        }
+
+       
+        public static async Task<List<Supabase.Gotrue.User>> GetUsersAsync()
+        {
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
+            try
+            {
+                
+                string selectQuery = "user_id, username, first_name, last_name, email, role_id, created_at, is_active";
+                
+                Console.WriteLine($"DEBUG: Executing Supabase User (from 'users' table) Select: {selectQuery}");
+
+                
+                var response = await _client.From<EquipmentAccounting.Models.User>()
+                                            .Select(selectQuery)
                                             .Get();
 
-                Debug.WriteLine($"SupabaseService: GetEquipmentList Status: {response?.ResponseMessage?.StatusCode}");
-                if (response != null && response.ResponseMessage.IsSuccessStatusCode)
+                if (response.ResponseMessage.IsSuccessStatusCode)
                 {
-                    return response.Models ?? new List<Equipment>();
+                   
+                    return response.Models != null ? response.Models : new List<Supabase.Gotrue.User>();
                 }
                 else
                 {
-                    // Формируем информативное сообщение об ошибке
-                    var errorReason = response?.ResponseMessage?.ReasonPhrase ?? "Unknown Reason";
-                    var errorContent = response != null ? await response.ResponseMessage.Content.ReadAsStringAsync() : "Response is null";
-                    string fullErrorMessage = $"Failed to fetch equipment. Status: {errorReason}. DB Error: {errorContent}";
-                    Debug.WriteLine($"!!! SupabaseService: {fullErrorMessage}");
-                    // Пробрасываем исключение с деталями ошибки
-                    throw new Exception(fullErrorMessage);
+                    string errorContent = await response.ResponseMessage.Content.ReadAsStringAsync();
+                    HandleErrorResponse("GetUsers (dictionary)", response.ResponseMessage, errorContent);
+                    return new List<Supabase.Gotrue.User>(); 
                 }
-            }
-            catch (Exception ex) // Ловим любые другие исключения (сеть и т.д.)
-            {
-                Debug.WriteLine($"!!! SupabaseService: Exception in GetEquipmentListAsync: {ex}");
-                // Пробрасываем исходное исключение, чтобы сохранить stack trace
-                throw;
-            }
-        }
-
-        public static async Task<Equipment> AddEquipmentAsync(Equipment newEquipment, long changedByUserId, string notes = "Equipment created")
-        {
-            EnsureClientInitialized(); // Проверка инициализации
-            if (newEquipment == null) throw new ArgumentNullException(nameof(newEquipment));
-            Debug.WriteLine($"SupabaseService: Adding Equipment '{newEquipment.Name}' by UserID {changedByUserId}...");
-
-            try
-            {
-                // 1. Добавляем оборудование
-                // Устанавливаем UpdatedAt перед добавлением, если нужно (или БД сама это делает)
-                // newEquipment.CreatedAt = DateTimeOffset.UtcNow; // Обычно устанавливается БД
-                newEquipment.UpdatedAt = DateTimeOffset.UtcNow;
-
-                var insertResponse = await _client.From<Equipment>().Insert(newEquipment);
-                var addedEquipment = insertResponse?.Models?.FirstOrDefault();
-
-                if (addedEquipment == null)
-                {
-                    var errorReason = insertResponse?.ResponseMessage?.ReasonPhrase ?? "Unknown Reason";
-                    var errorContent = insertResponse != null ? await insertResponse.ResponseMessage.Content.ReadAsStringAsync() : "Response is null";
-                    string fullErrorMessage = $"Failed to add equipment. Status: {errorReason}. DB Error: {errorContent}";
-                    Debug.WriteLine($"!!! SupabaseService: {fullErrorMessage}");
-                    throw new Exception(fullErrorMessage);
-                }
-                Debug.WriteLine($"SupabaseService: Equipment added with ID {addedEquipment.EquipmentId}.");
-
-                // 2. Добавляем запись в историю
-                var historyEntry = new AssignmentHistory
-                {
-                    EquipmentId = addedEquipment.EquipmentId,
-                    ChangedByUserId = changedByUserId,
-                    ChangeType = "Created",
-                    NewStatusId = addedEquipment.StatusId,
-                    NewLocationId = addedEquipment.LocationId,
-                    NewAssignedUserId = addedEquipment.AssignedUserId,
-                    Notes = notes // Используем переданные или стандартные заметки
-                };
-                await AddHistoryEntryAsync(historyEntry); // Вызываем метод добавления истории
-
-                return addedEquipment; // Возвращаем добавленный объект
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"!!! SupabaseService: Exception in AddEquipmentAsync: {ex}");
-                throw;
+                HandleGenericError("GetUsers (dictionary)", ex);
+                return new List<Supabase.Gotrue.User>(); 
             }
         }
 
-        public static async Task<Equipment> UpdateEquipmentAsync(Equipment updatedEquipment, Equipment originalEquipment, long changedByUserId, string notes)
+
+        
+        public static async Task<List<Equipment>> GetEquipmentListAsync()
         {
-            EnsureClientInitialized(); // Проверка инициализации
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
+            try
+            {
+                string selectQuery = "equipment_id, name, serial_number, inventory_number, description, purchase_date, warranty_expiry_date, created_at, updated_at, " +
+                                     "Category:categories(*), " +
+                                     "Status:statuses(*), " +
+                                     "Location:locations(*), " +
+                                     "AssignedUser:users!left(*)";
+                Console.WriteLine($"Executing Supabase Equipment Select: {selectQuery}");
+
+                var response = await _client.From<Equipment>()
+                                            .Select(selectQuery)
+                                            .Order("equipment_id", Ordering.Ascending)
+                                            .Get();
+
+                if (response.ResponseMessage.IsSuccessStatusCode)
+                {
+                    
+                    return response.Models != null ? response.Models : new List<Equipment>();
+                }
+                else
+                {
+                    string errorContent = await response.ResponseMessage.Content.ReadAsStringAsync();
+                    HandleErrorResponse("GetEquipmentList", response.ResponseMessage, errorContent, true);
+                    return null; 
+                }
+            }
+            catch (Exception ex)
+            {
+                HandleGenericError("GetEquipmentList", ex, true);
+                return null; 
+            }
+        }
+
+        
+        public static async Task<Equipment> AddEquipmentAsync(Equipment newEquipment, string changedByUserId, string notes = "Equipment created")
+        {
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
+            if (newEquipment == null) throw new ArgumentNullException(nameof(newEquipment));
+            if (string.IsNullOrEmpty(changedByUserId)) throw new ArgumentNullException(nameof(changedByUserId), "User ID performing the change cannot be null or empty.");
+
+            try
+            {
+                ModeledResponse<Equipment> insertResponse = await _client.From<Equipment>().Insert(newEquipment);
+                var addedEquipment = insertResponse.Models.FirstOrDefault();
+
+                if (addedEquipment == null || !insertResponse.ResponseMessage.IsSuccessStatusCode)
+                {
+                    string errorContent = await insertResponse.ResponseMessage.Content.ReadAsStringAsync();
+                    HandleErrorResponse("AddEquipment (Insert)", insertResponse.ResponseMessage, errorContent, true);
+                    return null; 
+                }
+
+                HandleHistoryEntry(addedEquipment.EquipmentId, changedByUserId, "Created", notes,
+                                   null, addedEquipment.StatusId,
+                                   null, addedEquipment.LocationId,
+                                   null, addedEquipment.AssignedUserId);
+                return addedEquipment;
+            }
+            catch (Exception ex)
+            {
+                HandleGenericError("AddEquipment", ex, true);
+                return null; 
+            }
+        }
+
+        
+        public static async Task<Equipment> UpdateEquipmentAsync(Equipment updatedEquipment, Equipment originalEquipment, string changedByUserId, string notes)
+        {
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
             if (updatedEquipment == null) throw new ArgumentNullException(nameof(updatedEquipment));
             if (originalEquipment == null) throw new ArgumentNullException(nameof(originalEquipment));
-            Debug.WriteLine($"SupabaseService: Updating Equipment ID {updatedEquipment.EquipmentId} by UserID {changedByUserId}...");
+            if (string.IsNullOrEmpty(changedByUserId)) throw new ArgumentNullException(nameof(changedByUserId));
 
             try
             {
-                // 1. Определяем, что изменилось для истории
-                var historyEntry = new AssignmentHistory
-                {
-                    EquipmentId = updatedEquipment.EquipmentId,
-                    ChangedByUserId = changedByUserId,
-                    Notes = notes
-                };
+                string changeType = null; bool changed = false;
+                if (originalEquipment.StatusId != updatedEquipment.StatusId) { changed = true; changeType = "Status Changed"; }
+                if (originalEquipment.LocationId != updatedEquipment.LocationId) { changed = true; changeType = (changeType == null ? "Moved" : changeType + ", Moved"); }
+                if (originalEquipment.AssignedUserId != updatedEquipment.AssignedUserId) { changed = true; changeType = (changeType == null ? "Assigned/Returned" : changeType + ", Assigned/Returned"); }
+                if (!changed && !string.IsNullOrWhiteSpace(notes) && notes != (originalEquipment.Description ?? "")) { changed = true; changeType = "Updated"; }
 
-                bool changed = false; // Флаг, были ли ЗНАЧИМЫЕ изменения для истории
-                string changeType = "";
-
-                // Сравниваем ключевые поля
-                if (originalEquipment.StatusId != updatedEquipment.StatusId)
-                {
-                    historyEntry.PreviousStatusId = originalEquipment.StatusId;
-                    historyEntry.NewStatusId = updatedEquipment.StatusId;
-                    changeType += "Status Changed; ";
-                    changed = true;
-                }
-                if (originalEquipment.LocationId != updatedEquipment.LocationId)
-                {
-                    historyEntry.PreviousLocationId = originalEquipment.LocationId;
-                    historyEntry.NewLocationId = updatedEquipment.LocationId;
-                    changeType += "Moved; ";
-                    changed = true;
-                }
-                if (originalEquipment.AssignedUserId != updatedEquipment.AssignedUserId)
-                {
-                    historyEntry.PreviousAssignedUserId = originalEquipment.AssignedUserId;
-                    historyEntry.NewAssignedUserId = updatedEquipment.AssignedUserId;
-                    changeType += "Assigned/Returned; ";
-                    changed = true;
-                }
-
-                // Проверяем, нужно ли записывать историю, если изменились другие поля или есть заметка
-                bool otherFieldsChanged = originalEquipment.Name != updatedEquipment.Name ||
-                                          originalEquipment.SerialNumber != updatedEquipment.SerialNumber ||
-                                          originalEquipment.InventoryNumber != updatedEquipment.InventoryNumber ||
-                                          originalEquipment.Description != updatedEquipment.Description ||
-                                          originalEquipment.PurchaseDate != updatedEquipment.PurchaseDate ||
-                                          originalEquipment.WarrantyExpiryDate != updatedEquipment.WarrantyExpiryDate ||
-                                          originalEquipment.CategoryId != updatedEquipment.CategoryId;
-
-                if (!changed && (otherFieldsChanged || !string.IsNullOrWhiteSpace(notes)))
-                {
-                    // Если ключевые поля не менялись, но изменились другие или есть заметка
-                    changeType = "Updated"; // Общий тип изменения
-                    changed = true; // Ставим флаг, чтобы история записалась
-                }
-
-                historyEntry.ChangeType = changeType.Trim().TrimEnd(';');
-
-
-                // 2. Обновляем запись оборудования в БД
-                // Устанавливаем UpdatedAt вручную перед отправкой
-                updatedEquipment.UpdatedAt = DateTimeOffset.UtcNow;
-
-                // Отправляем обновленный объект целиком
                 var updateResponse = await _client.From<Equipment>()
-                                                 .Update(updatedEquipment);
+                                                 .Where(eq => eq.EquipmentId == updatedEquipment.EquipmentId)
+                                                 .Set(eq => eq.Name, updatedEquipment.Name)
+                                                 .Set(eq => eq.SerialNumber, updatedEquipment.SerialNumber)
+                                                 .Set(eq => eq.InventoryNumber, updatedEquipment.InventoryNumber)
+                                                 .Set(eq => eq.Description, updatedEquipment.Description)
+                                                 .Set(eq => eq.PurchaseDate, updatedEquipment.PurchaseDate)
+                                                 .Set(eq => eq.WarrantyExpiryDate, updatedEquipment.WarrantyExpiryDate)
+                                                 .Set(eq => eq.CategoryId, updatedEquipment.CategoryId)
+                                                 .Set(eq => eq.StatusId, updatedEquipment.StatusId)
+                                                 .Set(eq => eq.LocationId, updatedEquipment.LocationId)
+                                                 .Set(eq => eq.AssignedUserId, updatedEquipment.AssignedUserId)
+                                                 .Set(eq => eq.UpdatedAt, DateTime.UtcNow)
+                                                 .Update();
 
-                var updatedResult = updateResponse?.Models?.FirstOrDefault();
+                var updatedResult = updateResponse.Models.FirstOrDefault();
 
-                if (updatedResult == null)
+                if (updatedResult == null || !updateResponse.ResponseMessage.IsSuccessStatusCode)
                 {
-                    var errorReason = updateResponse?.ResponseMessage?.ReasonPhrase ?? "Unknown Reason";
-                    var errorContent = updateResponse != null ? await updateResponse.ResponseMessage.Content.ReadAsStringAsync() : "Response is null";
-                    string fullErrorMessage = $"Failed to update equipment. Status: {errorReason}. DB Error: {errorContent}";
-                    Debug.WriteLine($"!!! SupabaseService: {fullErrorMessage}");
-                    throw new Exception(fullErrorMessage);
+                    string errorContent = await updateResponse.ResponseMessage.Content.ReadAsStringAsync();
+                    HandleErrorResponse("UpdateEquipment", updateResponse.ResponseMessage, errorContent, true);
+                    return null;
+
+                    if (changed)
+                    {
+                        HandleHistoryEntry(updatedEquipment.EquipmentId, changedByUserId, changeType, notes ?? "Updated via application",
+                                           originalEquipment.StatusId, updatedEquipment.StatusId,
+                                           originalEquipment.LocationId, updatedEquipment.LocationId,
+                                           originalEquipment.AssignedUserId, updatedEquipment.AssignedUserId);
+                    }
+                    return updatedResult;
                 }
-                Debug.WriteLine($"SupabaseService: Equipment ID {updatedResult.EquipmentId} updated.");
-
-
-                // 3. Добавляем запись в историю, если были изменения (флаг changed)
-                if (changed)
-                {
-                    await AddHistoryEntryAsync(historyEntry);
-                }
-                else
-                {
-                    Debug.WriteLine($"SupabaseService: No significant changes detected for Equipment ID {updatedEquipment.EquipmentId}, history skipped.");
-                }
-
-
-                return updatedResult; // Возвращаем обновленный объект
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"!!! SupabaseService: Exception in UpdateEquipmentAsync: {ex}");
-                throw;
+                HandleGenericError("UpdateEquipment", ex, true);
+                return null;
             }
         }
 
+        
         public static async Task DeleteEquipmentAsync(long equipmentId, long changedByUserId, string notes = "Equipment deleted")
         {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine($"SupabaseService: Deleting Equipment ID {equipmentId} by UserID {changedByUserId}...");
+            
+            var getResponse = await _client.From<Equipment>()
+                                       .Where(eq => eq.EquipmentId == equipmentId)
+                                       .Limit(1)
+                                       .Get();
+            var equipmentToDelete = getResponse.Models.FirstOrDefault();
 
-            try
+            if (equipmentToDelete == null)
             {
-                // 1. Сначала получаем данные об оборудовании для истории
-                var getResponse = await _client.From<Equipment>()
-                                           .Filter("equipment_id", Postgrest.Constants.Operator.Equals, equipmentId.ToString())
-                                           .Limit(1)
-                                           .Get();
-                var equipmentToDelete = getResponse?.Models?.FirstOrDefault();
+                
+                Console.WriteLine($"Equipment with ID {equipmentId} not found for deletion.");
+                
+                throw new KeyNotFoundException($"Equipment with ID {equipmentId} not found.");
+                
+            }
 
-                if (equipmentToDelete == null)
-                {
-                    string message = $"Equipment with ID {equipmentId} not found for deletion.";
-                    Debug.WriteLine($"!!! SupabaseService: {message}");
-                    throw new KeyNotFoundException(message);
-                }
+           
+            var historyEntry = new AssignmentHistory
+            {
+                EquipmentId = equipmentId,
+                ChangedByUserId = changedByUserId,
+                ChangeType = "Deleted",
+                PreviousStatusId = equipmentToDelete.StatusId,
+                PreviousLocationId = equipmentToDelete.LocationId,
+                PreviousAssignedUserId = equipmentToDelete.AssignedUserId,
+                Notes = notes
+            };
+           
 
-                // 2. Добавляем запись в историю ПЕРЕД удалением (если хотим сохранить историю)
-                var historyEntry = new AssignmentHistory
-                {
-                    EquipmentId = equipmentId,
-                    ChangedByUserId = changedByUserId,
-                    ChangeType = "Deleted",
-                    PreviousStatusId = equipmentToDelete.StatusId,
-                    PreviousLocationId = equipmentToDelete.LocationId,
-                    PreviousAssignedUserId = equipmentToDelete.AssignedUserId,
-                    Notes = notes
-                };
+            try 
+            {
+                
                 await AddHistoryEntryAsync(historyEntry);
 
-                // 3. Удаляем само оборудование
+                
                 await _client.From<Equipment>()
-                             .Filter("equipment_id", Postgrest.Constants.Operator.Equals, equipmentId.ToString())
+                             .Where(eq => eq.EquipmentId == equipmentId)
                              .Delete();
 
-                Debug.WriteLine($"SupabaseService: Equipment with ID {equipmentId} deleted successfully.");
+                Console.WriteLine($"Equipment with ID {equipmentId} deleted successfully.");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"!!! SupabaseService: Exception in DeleteEquipmentAsync for ID {equipmentId}: {ex}");
-                throw; // Пробрасываем исключение
+                
+                Console.WriteLine($"Error deleting equipment with ID {equipmentId}: {ex.Message}");
+                
+                throw new Exception($"Failed to delete equipment with ID {equipmentId}. See inner exception for details.", ex);
             }
         }
 
 
-        // --- Метод для работы с Историей ---
+
+        private static void HandleHistoryEntry(long equipmentId, string changedByAuthUserId, string changeType, string notes,
+                                                long? prevStatusId, long? newStatusId,
+                                                long? prevLocationId, long? newLocationId,
+                                                long? prevAssignedUserId, long? newAssignedUserId)
+        {
+            Console.WriteLine($"WARNING: History entry generation for Equipment ID {equipmentId}. " +
+                              $"The provided 'changedByAuthUserId' ({changedByAuthUserId}) is a STRING (UUID) from Supabase Auth. " +
+                              $"Your 'assignment_history.changed_by_user_id' column expects a BIGINT referencing 'users.user_id'. " +
+                              "History entry will NOT be saved until this is resolved (see code comments).");
+
+            var historyEntry = new AssignmentHistory
+            {
+                EquipmentId = equipmentId,
+
+                ChangeType = changeType ?? "Updated",
+                ChangeTimestamp = DateTimeOffset.UtcNow,
+                Notes = notes,
+                PreviousStatusId = newStatusId != prevStatusId ? prevStatusId : null,
+                NewStatusId = newStatusId != prevStatusId ? newStatusId : null,
+                PreviousLocationId = newLocationId != prevLocationId ? prevLocationId : null,
+                NewLocationId = newLocationId != prevLocationId ? newLocationId : null,
+                PreviousAssignedUserId = newAssignedUserId != prevAssignedUserId ? prevAssignedUserId : null,
+                NewAssignedUserId = newAssignedUserId != prevAssignedUserId ? newAssignedUserId : null
+            };
+
+            Console.WriteLine($"History entry generated (but not saved due to ID issue): EqID={historyEntry.EquipmentId}, Type={historyEntry.ChangeType}");
+        }
+        
+     
+            
+
+
+        
         public static async Task AddHistoryEntryAsync(AssignmentHistory historyEntry)
         {
-            EnsureClientInitialized(); // Проверка инициализации
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
             if (historyEntry == null) throw new ArgumentNullException(nameof(historyEntry));
 
-            historyEntry.ChangeTimestamp = DateTimeOffset.UtcNow; // Устанавливаем время прямо перед записью
-            Debug.WriteLine($"SupabaseService: Adding History for Equipment ID {historyEntry.EquipmentId}, Type: {historyEntry.ChangeType ?? "N/A"}...");
+            
+
             try
             {
-                // Отправляем объект истории на вставку
+                historyEntry.ChangeTimestamp = DateTimeOffset.UtcNow;
                 var response = await _client.From<AssignmentHistory>().Insert(historyEntry);
-
-                // Проверяем ответ (опционально, Insert обычно бросает исключение при ошибке)
-                if (response?.ResponseMessage != null && !response.ResponseMessage.IsSuccessStatusCode)
+                if (!response.ResponseMessage.IsSuccessStatusCode)
                 {
-                    var errorContent = await response.ResponseMessage.Content.ReadAsStringAsync();
-                    Debug.WriteLine($"!!! SupabaseService: Failed to add history entry. Status: {response.ResponseMessage.ReasonPhrase}. DB Error: {errorContent}");
-                    // Можно решить, стоит ли падать из-за ошибки истории
-                    // throw new Exception($"Failed to add history entry: {response.ResponseMessage.ReasonPhrase}");
+                    string errorContent = await response.ResponseMessage.Content.ReadAsStringAsync();
+                    Console.WriteLine($"Error adding history entry: Status={response.ResponseMessage.StatusCode}, Reason={response.ResponseMessage.ReasonPhrase}, Content={errorContent}");
                 }
-                else
-                {
-                    Debug.WriteLine($"SupabaseService: History entry added.");
-                }
+                else { Console.WriteLine($"History entry added successfully for equipment ID {historyEntry.EquipmentId}."); }
             }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"!!! SupabaseService: Exception in AddHistoryEntryAsync: {ex}");
-                // Можно проигнорировать или пробросить дальше
-                // throw;
-            }
+            catch (Exception ex) { Console.WriteLine($"Generic error adding history entry: {ex}"); }
         }
 
+        
         public static async Task<List<AssignmentHistory>> GetEquipmentHistoryAsync(long equipmentId)
         {
-            EnsureClientInitialized(); // Проверка инициализации
-            Debug.WriteLine($"SupabaseService: Getting History for Equipment ID {equipmentId}...");
+            if (_client == null) throw new InvalidOperationException("Supabase client not initialized.");
             try
             {
                 var response = await _client.From<AssignmentHistory>()
-                                           // Загружаем данные пользователя, внесшего изменения
-                                           .Select("*, changed_by_user:users!changed_by_user_id(user_id, first_name, last_name, username)")
-                                           .Filter("equipment_id", Postgrest.Constants.Operator.Equals, equipmentId.ToString())
-                                           .Order("change_timestamp", Postgrest.Constants.Ordering.Descending)
-                                           .Get();
+                                            .Select("*")
+                                            .Where(h => h.EquipmentId == equipmentId)
+                                            .Order("change_timestamp", Ordering.Descending)
+                                            .Get();
 
-                Debug.WriteLine($"SupabaseService: GetHistory Status: {response?.ResponseMessage?.StatusCode}");
-
-                if (response != null && response.ResponseMessage.IsSuccessStatusCode)
+                if (!response.ResponseMessage.IsSuccessStatusCode)
                 {
-                    return response.Models ?? new List<AssignmentHistory>();
+                    string errorContent = await response.ResponseMessage.Content.ReadAsStringAsync();
+                    HandleErrorResponse("GetEquipmentHistory", response.ResponseMessage, errorContent);
                 }
-                else
-                {
-                    var errorReason = response?.ResponseMessage?.ReasonPhrase ?? "Unknown Reason";
-                    var errorContent = response != null ? await response.ResponseMessage.Content.ReadAsStringAsync() : "Response is null";
-                    string fullErrorMessage = $"Failed to fetch history. Status: {errorReason}. DB Error: {errorContent}";
-                    Debug.WriteLine($"!!! SupabaseService: {fullErrorMessage}");
-                    throw new Exception(fullErrorMessage);
-                }
+                
+                return response.Models != null ? response.Models : new List<AssignmentHistory>();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"!!! SupabaseService: Exception in GetEquipmentHistoryAsync for ID {equipmentId}: {ex}");
-                throw;
+                HandleGenericError("GetEquipmentHistory", ex);
+                return new List<AssignmentHistory>();
             }
         }
 
-
-        // --- Временная заглушка для ID пользователя ---
-        public static long GetCurrentUserIdPlaceholder()
+        
+        private static void HandleErrorResponse(string operation, System.Net.Http.HttpResponseMessage response, string content, bool throwException = false)
         {
-            // Возвращаем ID пользователя (например, администратора или системного пользователя)
-            // который будет использоваться для записи истории по умолчанию.
-            long defaultUserId = 1; // ID пользователя 'admin' из вашего скрипта
-            Debug.WriteLine($"SupabaseService: Using placeholder User ID: {defaultUserId}");
-            return defaultUserId;
+            string errorMessage = $"Error during operation '{operation}': Status={response.StatusCode}, Reason={response.ReasonPhrase}";
+            string detailedMessage = errorMessage;
+            try
+            {
+                using (var jsonDoc = JsonDocument.Parse(content))
+                {
+                    if (jsonDoc.RootElement.TryGetProperty("message", out var msg)) { detailedMessage += $", Message: {msg.GetString()}"; }
+                    if (jsonDoc.RootElement.TryGetProperty("details", out var det)) { detailedMessage += $", Details: {det.GetString()}"; }
+                    if (jsonDoc.RootElement.TryGetProperty("hint", out var hint)) { detailedMessage += $", Hint: {hint.GetString()}"; }
+                }
+            }
+            catch { detailedMessage = $"{errorMessage}, Content: {content}"; }
+
+            Console.WriteLine($"ERROR: {detailedMessage}");
+            if (throwException) { throw new Exception($"Operation '{operation}' failed: {detailedMessage}"); }
         }
-    } // Конец класса SupabaseService
-} // Конец namespace
+
+        
+        private static void HandleGenericError(string operation, Exception ex, bool throwException = false)
+        {
+            Console.WriteLine($"ERROR: Generic exception during operation '{operation}': {ex}");
+            if (throwException) { throw new Exception($"An internal error occurred during '{operation}': {ex.Message}", ex); }
+        }
+
+
+        
+    }
+}
